@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th scope="col">Name</th>
+      <th scope="col">Status</th>
+      <th scope="col">Level</th>
+      <th scope="col">Respawn start</th>
+      <th scope="col">Respawn End</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="a : ${allBosses}" th:object="${a}">
+
+      <td>
+        <a th:text="*{name}"
+           ></a>
+      </td>
+      <td>
+        <span th:if="*{alive}" class="text-success">Alive</span>
+        <span th:unless="*{alive}" class="text-danger">Dead</span>
+      </td>
+      <td th:text="*{respawnStart}"></td>
+      <td th:text="*{respawnEnd}"></td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+</body>
+</html>
