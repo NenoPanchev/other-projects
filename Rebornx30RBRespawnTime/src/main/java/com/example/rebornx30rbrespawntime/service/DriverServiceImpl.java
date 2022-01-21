@@ -1,5 +1,6 @@
 package com.example.rebornx30rbrespawntime.service;
 
+import com.example.rebornx30rbrespawntime.constants.GlobalConstants;
 import com.example.rebornx30rbrespawntime.model.entity.RaidBoss;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -13,13 +14,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.example.rebornx30rbrespawntime.constants.GlobalConstants.EXCLUDED_RAIDBOSSES;
+
 @Component
 public class DriverServiceImpl {
-    private final RaidBossService raidBossService;
+    private LocalDateTime timeOfUpdate;
 
-
-    public DriverServiceImpl(RaidBossService raidBossService) {
-        this.raidBossService = raidBossService;
+    public DriverServiceImpl() {
     }
 
     public List<RaidBoss> parseHTMLIntoRBInfo(Document doc) {
@@ -32,8 +33,7 @@ public class DriverServiceImpl {
             boolean alive = respawns.size() == 0;
 
             String level = boss.textNodes().get(2).text();
-            Integer levelNumber = Integer.parseInt(String.valueOf(Arrays.stream(level.split(": ")).skip(1).findFirst().orElse("0")));
-            System.out.println();
+            Integer levelNumber = Integer.parseInt(Arrays.stream(level.split(": ")).skip(1).findFirst().orElse("0"));
             LocalDateTime localDateTime = null;
             if (!alive) {
                 String timeString = respawns.get(1).text().replace("**", "00").replace(" UTC", "");
@@ -57,9 +57,16 @@ public class DriverServiceImpl {
         return raidBosses;
     }
 
-    private static boolean nameNotIn(String name) {
-        String names = "Valakas Antharas Baium Queen Ant Sailren Benom Scarlet van Halisha Eilhalder von Hellmann" +
-                " Soul of Water Ashatur Soul of Fire Nastron Icicle Emperor Bumbalump Daimon the White-Eyed Lilith Anakim";
-        return !names.contains(name);
+    private boolean nameNotIn(String name) {
+        return !EXCLUDED_RAIDBOSSES.contains(name);
+    }
+
+    public LocalDateTime getTimeOfUpdate() {
+        return timeOfUpdate;
+    }
+
+    public DriverServiceImpl setTimeOfUpdate(LocalDateTime timeOfUpdate) {
+        this.timeOfUpdate = timeOfUpdate;
+        return this;
     }
 }

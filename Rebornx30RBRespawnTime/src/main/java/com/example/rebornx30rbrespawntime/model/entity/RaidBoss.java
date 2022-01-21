@@ -14,8 +14,10 @@ public class RaidBoss extends BaseEntity{
     private LocalDateTime respawnStart;
     private LocalDateTime respawnEnd;
     private LocalDateTime timeOfDeath;
+    private Long respawnTime;
 
     public RaidBoss() {
+        setRespawnTime(18L);
     }
 
     @Column
@@ -75,6 +77,15 @@ public class RaidBoss extends BaseEntity{
 
     public RaidBoss setTimeOfDeath(LocalDateTime timeOfDeath) {
         this.timeOfDeath = timeOfDeath;
+        return this;
+    }
+
+    public Long getRespawnTime() {
+        return respawnTime;
+    }
+
+    public RaidBoss setRespawnTime(Long respawnTime) {
+        this.respawnTime = respawnTime;
         return this;
     }
 }

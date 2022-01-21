@@ -10,13 +10,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AppBeanConfiguration {
 
-//    @Bean
-//    public WebDriver driver() {
-//        System.setProperty("webdriver.gecko.driver", "src/main/resources/files/geckodriver.exe");
-//        FirefoxBinary firefoxBinary = new FirefoxBinary();
-//        FirefoxOptions options = new FirefoxOptions();
-//        options.setBinary(firefoxBinary);
-//        options.setHeadless(true);
-//        return new FirefoxDriver(options);
-//    }
+    @Bean
+    public WebDriver driver() {
+        System.setProperty("webdriver.gecko.driver", "src/main/resources/static/drivers/geckodriver.exe");
+        FirefoxBinary firefoxBinary = new FirefoxBinary();
+        FirefoxOptions options = new FirefoxOptions();
+        options.setBinary(firefoxBinary);
+        options.setHeadless(true);
+        return new FirefoxDriver(options);
+    }
 }

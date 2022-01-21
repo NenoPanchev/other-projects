@@ -59,27 +59,30 @@
             <artifactId>jsoup</artifactId>
             <version>1.10.2</version>
         </dependency>
-        <dependency>
-            <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-remote-driver</artifactId>
-            <version>4.0.0-alpha-4</version>
-        </dependency>
-        <!-- Thanks for using https://jar-download.com -->
-        <dependency>
-            <groupId>io.github.bonigarcia</groupId>
-            <artifactId>webdrivermanager</artifactId>
-            <version>5.0.3</version>
-        </dependency>
+
+        <!-- only this origin -->
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
-            <version>3.141.59</version>
+            <version>4.0.0</version>
+        </dependency>
+        <!-- add belows for these dependencies version is not 4.0.0 when automatically generated -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-chrome-driver</artifactId>
+            <version>4.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-api</artifactId>
-            <version>3.141.59</version>
+            <version>4.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-remote-driver</artifactId>
+            <version>4.0.0</version>
+        </dependency>
+
 
     </dependencies>
 
