@@ -1,15 +1,16 @@
 package com.example.rebornx30rbrespawntime.service;
 
 import com.example.rebornx30rbrespawntime.model.entity.RaidBoss;
+import com.example.rebornx30rbrespawntime.model.view.RaidBossViewModel;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 public interface RaidBossService {
     void seedRaidBoss(RaidBoss raidBoss);
-    List<RaidBoss> getAllRaidBosses();
+    List<RaidBossViewModel> getAllRaidBosses();
 
     void updateInfo(List<RaidBoss> raidBosses);
 
-    void updateTimeOfDeath(Long id, LocalDateTime timeOfDeath);
+    void updateTimeOfDeath(String name, LocalDateTime timeOfDeath);
 }

@@ -1,5 +1,6 @@
 package com.example.rebornx30rbrespawntime.config;
 
+import org.modelmapper.ModelMapper;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -18,5 +19,10 @@ public class AppBeanConfiguration {
         options.setBinary(firefoxBinary);
         options.setHeadless(true);
         return new FirefoxDriver(options);
+    }
+
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
     }
 }

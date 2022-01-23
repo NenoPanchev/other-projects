@@ -4,10 +4,10 @@ import com.example.rebornx30rbrespawntime.service.RaidBossService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Controller
 public class HomeController {
@@ -23,11 +23,12 @@ public class HomeController {
         return "index";
     }
 
-    @PostMapping("/addToD/{id}")
-    public String addToD(@PathVariable("id") Long id) {
+    @GetMapping(value = "/add", params = {"bossName", "tod"})
+    public String addToD(@RequestParam String bossName, @RequestParam String tod) {
 
-        LocalDateTime timeOfDeath = LocalDateTime.now();
-        raidBossService.updateTimeOfDeath(id, timeOfDeath);
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+        LocalDateTime timeOfDeath = LocalDateTime.parse(tod, dateTimeFormatter);
+        raidBossService.updateTimeOfDeath(bossName, timeOfDeath);
         return "redirect:/";
     }
 }
