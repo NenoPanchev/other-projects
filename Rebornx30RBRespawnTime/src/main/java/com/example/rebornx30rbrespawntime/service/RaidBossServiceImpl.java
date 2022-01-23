@@ -61,8 +61,20 @@ public class RaidBossServiceImpl implements RaidBossService {
             }
 
             RaidBoss rbEntity = raidBossRepository.findByName(rb.getName()).orElseThrow();
-            Long hoursDifference = Duration.between(rb.getRespawnStart(), rbEntity.getRespawnStart()).toHours();
+
+            if (rb.isAlive()) {
+                rbEntity.setRespawnStart(null)
+                        .setRespawnEnd(null)
+                        .setTimeOfDeath(null)
+                        .setAlive(true);
+                raidBossRepository.save(rbEntity);
+                continue;
+            }
+
+            Long entityHour = Long.valueOf(rbEntity.getRespawnStart() == null ? 0 : rbEntity.getRespawnStart().getHour());
+            Long hoursDifference = Duration.between(rb.getRespawnStart() - entityHour));
             if (hoursDifference != 0) {
+                rbEntity.setAlive(false);
                 if (hoursDifference > rbEntity.getRespawnTime() + 1) {
                     rbEntity.setRespawnStart(rb.getRespawnStart());
                     rbEntity.setRespawnEnd(rb.getRespawnEnd());
@@ -79,9 +91,10 @@ public class RaidBossServiceImpl implements RaidBossService {
     public void updateTimeOfDeath(String name, LocalDateTime timeOfDeath) {
         RaidBoss rbEntity = raidBossRepository.findByName(name).orElseThrow();
         rbEntity.setTimeOfDeath(timeOfDeath);
-        Long hoursDifference = Long.valueOf(Math.abs(timeOfDeath.getHour() - rbEntity.getRespawnStart().getHour()));
+        Long hoursDifference = Duration.between(timeOfDeath, rbEntity.getRespawnStart()).toHours();
+
         int minuteOfDeath = timeOfDeath.getMinute();
-        if (hoursDifference == rbEntity.getRespawnTime()) {
+        if (hoursDifference <= rbEntity.getRespawnTime()) {
             rbEntity.setRespawnStart(rbEntity.getRespawnStart().plusMinutes(minuteOfDeath));
         } else {
             rbEntity.setRespawnEnd(rbEntity.getRespawnStart().plusMinutes(minuteOfDeath));
@@ -92,9 +105,9 @@ public class RaidBossServiceImpl implements RaidBossService {
     private void setRespawnByTimeOfDeath(RaidBoss rbEntity, RaidBoss rbNewInfo, LocalDateTime timeOfDeath) {
         rbEntity.setTimeOfDeath(timeOfDeath);
 
-        Long hoursDifference = Long.valueOf(Math.abs(timeOfDeath.getHour() - rbNewInfo.getRespawnStart().getHour()));
+        Long hoursDifference = Duration.between(timeOfDeath, rbNewInfo.getRespawnStart()).toHours();
         int minuteOfDeath = timeOfDeath.getMinute();
-        if (hoursDifference == rbEntity.getRespawnTime()) {
+        if (hoursDifference <= rbEntity.getRespawnTime()) {
             rbEntity.setRespawnStart(rbNewInfo.getRespawnStart().plusMinutes(minuteOfDeath));
             rbEntity.setRespawnEnd(rbNewInfo.getRespawnEnd());
         } else {
