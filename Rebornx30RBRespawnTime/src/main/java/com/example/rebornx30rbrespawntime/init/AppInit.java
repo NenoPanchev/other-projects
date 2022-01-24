@@ -12,6 +12,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.awt.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -33,20 +34,19 @@ public class AppInit implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        update();
-
-
-
     }
 
-    @Scheduled(cron = "${refresh-cron}")
+    @Scheduled(fixedRate = 300000)
     public void update() {
         driver.get(SITE_URL);
         Document doc = Jsoup.parse(driver.getPageSource());
         List<RaidBoss> raidBosses = driverService.parseHTMLIntoRBInfo(doc);
         driverService.setTimeOfUpdate(LocalDateTime.now());
         raidBossService.updateInfo(raidBosses);
-        System.out.println("5 min passed");
 
+        System.out.println("5 min passed");
+        Toolkit.getDefaultToolkit().beep();
+        System.out.print("\007");
+        System.out.flush();
     }
 }

@@ -6,6 +6,7 @@ import com.example.rebornx30rbrespawntime.repository.RaidBossRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -41,8 +42,8 @@ public class RaidBossServiceImpl implements RaidBossService {
                 .findAllByOrderByRespawnEnd()
                 .stream()
                 .map(entity -> modelMapper.map(entity, RaidBossViewModel.class)
-                .setRespawnStart(getTimeFrom(entity.getRespawnStart()))
-                .setRespawnEnd(getTimeFrom(entity.getRespawnEnd()))
+                .setRespawnStart(entity.getRespawnStart() == null ? "" : getTimeFrom(entity.getRespawnStart()))
+                .setRespawnEnd(entity.getRespawnEnd() == null ? "" : getTimeFrom(entity.getRespawnEnd()))
                 .setTimeOfDeath(entity.getTimeOfDeath() == null ? "" : getTimeFrom(entity.getTimeOfDeath())))
                 .collect(Collectors.toList());
     }
@@ -68,11 +69,20 @@ public class RaidBossServiceImpl implements RaidBossService {
                         .setTimeOfDeath(null)
                         .setAlive(true);
                 raidBossRepository.save(rbEntity);
+                Toolkit.getDefaultToolkit().beep();
                 continue;
             }
 
-            Long entityHour = Long.valueOf(rbEntity.getRespawnStart() == null ? 0 : rbEntity.getRespawnStart().getHour());
-            Long hoursDifference = Duration.between(rb.getRespawnStart() - entityHour));
+            if (rbEntity.isAlive() && !rb.isAlive()) {
+                rbEntity.setRespawnStart(rb.getRespawnStart())
+                        .setAlive(rb.isAlive())
+                        .setRespawnEnd(rb.getRespawnEnd())
+                        .setTimeOfDeath(driverService.getTimeOfUpdate());
+                raidBossRepository.save(rbEntity);
+                continue;
+            }
+
+            Long hoursDifference = Math.abs(Duration.between(rb.getRespawnStart(), rbEntity.getRespawnStart()).toHours());
             if (hoursDifference != 0) {
                 rbEntity.setAlive(false);
                 if (hoursDifference > rbEntity.getRespawnTime() + 1) {
@@ -94,7 +104,7 @@ public class RaidBossServiceImpl implements RaidBossService {
         Long hoursDifference = Duration.between(timeOfDeath, rbEntity.getRespawnStart()).toHours();
 
         int minuteOfDeath = timeOfDeath.getMinute();
-        if (hoursDifference <= rbEntity.getRespawnTime()) {
+        if (hoursDifference < rbEntity.getRespawnTime()) {
             rbEntity.setRespawnStart(rbEntity.getRespawnStart().plusMinutes(minuteOfDeath));
         } else {
             rbEntity.setRespawnEnd(rbEntity.getRespawnStart().plusMinutes(minuteOfDeath));
@@ -107,7 +117,7 @@ public class RaidBossServiceImpl implements RaidBossService {
 
         Long hoursDifference = Duration.between(timeOfDeath, rbNewInfo.getRespawnStart()).toHours();
         int minuteOfDeath = timeOfDeath.getMinute();
-        if (hoursDifference <= rbEntity.getRespawnTime()) {
+        if (hoursDifference < rbEntity.getRespawnTime()) {
             rbEntity.setRespawnStart(rbNewInfo.getRespawnStart().plusMinutes(minuteOfDeath));
             rbEntity.setRespawnEnd(rbNewInfo.getRespawnEnd());
         } else {
