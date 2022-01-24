@@ -6,7 +6,10 @@ import com.example.rebornx30rbrespawntime.repository.RaidBossRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.awt.*;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,11 +22,13 @@ public class RaidBossServiceImpl implements RaidBossService {
     private final RaidBossRepository raidBossRepository;
     private final DriverServiceImpl driverService;
     private final ModelMapper modelMapper;
+    private final AudioServiceImpl audioService;
 
-    public RaidBossServiceImpl(RaidBossRepository raidBossRepository, DriverServiceImpl driverService, ModelMapper modelMapper) {
+    public RaidBossServiceImpl(RaidBossRepository raidBossRepository, DriverServiceImpl driverService, ModelMapper modelMapper, AudioServiceImpl audioService) {
         this.raidBossRepository = raidBossRepository;
         this.driverService = driverService;
         this.modelMapper = modelMapper;
+        this.audioService = audioService;
     }
 
     @Override
@@ -54,7 +59,7 @@ public class RaidBossServiceImpl implements RaidBossService {
     }
 
     @Override
-    public void updateInfo(List<RaidBoss> raidBosses) {
+    public void updateInfo(List<RaidBoss> raidBosses) throws UnsupportedAudioFileException, LineUnavailableException, IOException {
         for (RaidBoss rb : raidBosses) {
             if (!raidBossRepository.existsByName(rb.getName())) {
                 seedRaidBoss(rb);
@@ -69,7 +74,7 @@ public class RaidBossServiceImpl implements RaidBossService {
                         .setTimeOfDeath(null)
                         .setAlive(true);
                 raidBossRepository.save(rbEntity);
-                Toolkit.getDefaultToolkit().beep();
+                audioService.playSound();
                 continue;
             }
 
@@ -79,16 +84,19 @@ public class RaidBossServiceImpl implements RaidBossService {
                         .setRespawnEnd(rb.getRespawnEnd())
                         .setTimeOfDeath(driverService.getTimeOfUpdate());
                 raidBossRepository.save(rbEntity);
+
+                setRespawnByTimeOfDeath(rbEntity, rb, driverService.getTimeOfUpdate());
                 continue;
             }
 
             Long hoursDifference = Math.abs(Duration.between(rb.getRespawnStart(), rbEntity.getRespawnStart()).toHours());
             if (hoursDifference != 0) {
-                rbEntity.setAlive(false);
+
                 if (hoursDifference > rbEntity.getRespawnTime() + 1) {
                     rbEntity.setRespawnStart(rb.getRespawnStart());
                     rbEntity.setRespawnEnd(rb.getRespawnEnd());
                     rbEntity.setTimeOfDeath(null);
+                    rbEntity.setAlive(false);
                     raidBossRepository.save(rbEntity);
                 } else {
                     setRespawnByTimeOfDeath(rbEntity, rb, driverService.getTimeOfUpdate());
@@ -114,6 +122,7 @@ public class RaidBossServiceImpl implements RaidBossService {
 
     private void setRespawnByTimeOfDeath(RaidBoss rbEntity, RaidBoss rbNewInfo, LocalDateTime timeOfDeath) {
         rbEntity.setTimeOfDeath(timeOfDeath);
+        rbEntity.setAlive(false);
 
         Long hoursDifference = Duration.between(timeOfDeath, rbNewInfo.getRespawnStart()).toHours();
         int minuteOfDeath = timeOfDeath.getMinute();
