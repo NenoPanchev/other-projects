@@ -55,7 +55,11 @@ public class RaidBossServiceImpl implements RaidBossService {
 
     private String getTimeFrom(LocalDateTime localDateTime) {
         String[] str = localDateTime.toString().split("T");
-        return str[1].substring(0, 5);
+        String hour = str[1].substring(0, 5);
+        String[] date = str[0].split("-");
+        String day = date[2];
+        String month = date[1];
+        return String.format("%s.%s  -  %s", day, month, hour);
     }
 
     @Override
@@ -92,7 +96,7 @@ public class RaidBossServiceImpl implements RaidBossService {
             Long hoursDifference = Math.abs(Duration.between(rb.getRespawnStart(), rbEntity.getRespawnStart()).toHours());
             if (hoursDifference != 0) {
 
-                if (hoursDifference > rbEntity.getRespawnTime() + 1) {
+                if (hoursDifference > rbEntity.getRespawnTime() + 1 || hoursDifference < rbEntity.getRespawnTime() - 1) {
                     rbEntity.setRespawnStart(rb.getRespawnStart());
                     rbEntity.setRespawnEnd(rb.getRespawnEnd());
                     rbEntity.setTimeOfDeath(null);
