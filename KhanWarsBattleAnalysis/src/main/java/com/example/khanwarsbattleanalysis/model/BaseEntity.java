@@ -1,0 +1,24 @@
+package com.example.khanwarsbattleanalysis.model;
+
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
+
+@MappedSuperclass
+public abstract class BaseEntity {
+    private Long id;
+
+    public BaseEntity() {
+    }
+
+    @Id
+    @GeneratedValue
+    public Long getId() {
+        return id;
+    }
+
+    public BaseEntity setId(Long id) {
+        this.id = id;
+        return this;
+    }
+}
