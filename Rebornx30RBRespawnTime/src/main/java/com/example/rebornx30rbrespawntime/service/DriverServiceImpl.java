@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.example.rebornx30rbrespawntime.constants.GlobalConstants.EXCLUDED_RAIDBOSSES;
+import static com.example.rebornx30rbrespawntime.constants.GlobalConstants.LEVEL_BRACKET;
 
 @Component
 public class DriverServiceImpl {
@@ -34,21 +35,25 @@ public class DriverServiceImpl {
 
             String level = boss.textNodes().get(2).text();
             Integer levelNumber = Integer.parseInt(Arrays.stream(level.split(": ")).skip(1).findFirst().orElse("0"));
-            LocalDateTime localDateTime = null;
+            LocalDateTime respawnStart = null;
+            LocalDateTime respawnEnd = null;
             if (!alive) {
                 String timeString = respawns.get(1).text().replace("**", "00").replace(" UTC", "");
+                String startString = Arrays.stream(timeString.split(" - ")).findFirst().orElse("");
+                String endString = timeString.substring(0, 10) + Arrays.stream(timeString.split(" -")).skip(1).findFirst().orElse("");
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-                localDateTime = LocalDateTime.parse(timeString, formatter).plusHours(2);
+                respawnStart = LocalDateTime.parse(startString, formatter).plusHours(2);
+                respawnEnd = LocalDateTime.parse(endString, formatter).plusHours(2);
 
             }
-            if (levelNumber >= 70 && nameNotIn(name)) {
+            if (levelNumber >= LEVEL_BRACKET && nameNotIn(name)) {
 
                 RaidBoss rb = new RaidBoss()
                         .setLevel(levelNumber)
                         .setName(name)
                         .setAlive(alive)
-                        .setRespawnStart(localDateTime)
-                        .setRespawnEnd(localDateTime == null ? null : localDateTime.plusHours(1));
+                        .setRespawnStart(respawnStart)
+                        .setRespawnEnd(respawnEnd);
 
                 raidBosses.add(rb);
             }

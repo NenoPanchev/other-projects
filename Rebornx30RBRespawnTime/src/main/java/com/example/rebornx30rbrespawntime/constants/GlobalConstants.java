@@ -9,4 +9,5 @@ public class GlobalConstants {
     public static final String BARAKIEL = "Flame of Splendor Barakiel";
     public static final String SITE_URL = "https://seasons.l2reborn.org/raidbosses-map";
     public static final String SOUND_FILE_PATH = "src/main/resources/static/sounds/tada.wav";
+    public static final int LEVEL_BRACKET = 54;
 }
