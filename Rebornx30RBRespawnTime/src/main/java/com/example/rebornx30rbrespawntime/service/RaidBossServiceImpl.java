@@ -49,6 +49,7 @@ public class RaidBossServiceImpl implements RaidBossService {
                 .map(entity -> modelMapper.map(entity, RaidBossViewModel.class)
                 .setRespawnStart(entity.getRespawnStart() == null ? "" : getTimeFrom(entity.getRespawnStart()))
                 .setRespawnEnd(entity.getRespawnEnd() == null ? "" : getTimeFrom(entity.getRespawnEnd()))
+                        .setRespawnStartTime(entity.getRespawnStart() == null ? null : entity.getRespawnStart())
                 .setTimeOfDeath(entity.getTimeOfDeath() == null ? "" : getTimeFrom(entity.getTimeOfDeath())))
                 .collect(Collectors.toList());
     }
@@ -85,26 +86,20 @@ public class RaidBossServiceImpl implements RaidBossService {
             if (rbEntity.isAlive() && !rb.isAlive()) {
                 rbEntity.setRespawnStart(rb.getRespawnStart())
                         .setAlive(rb.isAlive())
-                        .setRespawnEnd(rb.getRespawnEnd())
-                        .setTimeOfDeath(driverService.getTimeOfUpdate());
+                        .setRespawnEnd(rb.getRespawnEnd());
                 raidBossRepository.save(rbEntity);
 
-                setRespawnByTimeOfDeath(rbEntity, rb, driverService.getTimeOfUpdate());
+//                setRespawnByTimeOfDeath(rbEntity, rb, driverService.getTimeOfUpdate());
                 continue;
             }
 
             Long hoursDifference = Math.abs(Duration.between(rb.getRespawnStart(), rbEntity.getRespawnStart()).toHours());
             if (hoursDifference != 0) {
-
-                if (hoursDifference > rbEntity.getRespawnTime() + 1 || hoursDifference < rbEntity.getRespawnTime() - 1) {
                     rbEntity.setRespawnStart(rb.getRespawnStart());
                     rbEntity.setRespawnEnd(rb.getRespawnEnd());
                     rbEntity.setTimeOfDeath(null);
                     rbEntity.setAlive(false);
                     raidBossRepository.save(rbEntity);
-                } else {
-                    setRespawnByTimeOfDeath(rbEntity, rb, driverService.getTimeOfUpdate());
-                }
             }
         }
     }

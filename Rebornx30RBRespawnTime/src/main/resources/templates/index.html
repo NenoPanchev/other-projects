@@ -9,6 +9,7 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
 </head>
 <body>
 <div class="table-responsive">
@@ -20,7 +21,7 @@
             <th scope="col">Level</th>
             <th scope="col">Respawn Start</th>
             <th scope="col">Respawn End</th>
-            <th scope="col">Time of Death</th>
+            <th scope="col">Window</th>
             <th scope="col">Add Time of Death</th>
         </tr>
         </thead>
@@ -40,7 +41,13 @@
                 <td th:text="*{level}"></td>
                 <td th:text="*{respawnStart}"></td>
                 <td th:text="*{respawnEnd}"></td>
-                <td th:text="*{timeOfDeath}  == null ? '' : *{timeOfDeath}"></td>
+                <td>
+                    <div class="bar" th:if="*{alive} == false and ${now} &gt; *{respawnStartTime}">
+                        <div class="bar-inner" th:styleappend="true ? ${a.getWidthPercentage(now)} : ''">
+
+                        </div>
+                    </div>
+                </td>
                 <td><input type="datetime-local" class="form-control datetimepicker"
                            name="tod" id="posted"></td>
                 <td>

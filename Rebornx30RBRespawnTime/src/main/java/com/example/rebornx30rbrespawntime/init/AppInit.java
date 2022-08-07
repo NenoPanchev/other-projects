@@ -22,9 +22,9 @@ import static com.example.rebornx30rbrespawntime.constants.GlobalConstants.SITE_
 
 @Component
 public class AppInit implements CommandLineRunner {
-    private final RaidBossService raidBossService;
-    private final DriverServiceImpl driverService;
-    private final WebDriver driver;
+    private static RaidBossService raidBossService;
+    private static DriverServiceImpl driverService;
+    private static WebDriver driver;
 
 
     public AppInit(RaidBossService raidBossService, DriverServiceImpl driverService, WebDriver driver) {
@@ -39,11 +39,10 @@ public class AppInit implements CommandLineRunner {
     }
 
     @Scheduled(fixedRate = 180000)
-    public void update() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
+    public static void update() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
         driver.get(SITE_URL);
         Document doc = Jsoup.parse(driver.getPageSource());
         List<RaidBoss> raidBosses = driverService.parseHTMLIntoRBInfo(doc);
-        driverService.setTimeOfUpdate(LocalDateTime.now());
         raidBossService.updateInfo(raidBosses);
 
         System.out.println("3 min passed");

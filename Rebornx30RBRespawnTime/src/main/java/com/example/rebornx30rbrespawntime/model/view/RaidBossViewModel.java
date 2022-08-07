@@ -1,5 +1,8 @@
 package com.example.rebornx30rbrespawntime.model.view;
 
+import com.example.rebornx30rbrespawntime.constants.GlobalConstants;
+
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 public class RaidBossViewModel {
@@ -9,6 +12,7 @@ public class RaidBossViewModel {
     private boolean isAlive;
     private String respawnStart;
     private String respawnEnd;
+    private LocalDateTime respawnStartTime;
     private String timeOfDeath;
 
     public RaidBossViewModel() {
@@ -76,4 +80,36 @@ public class RaidBossViewModel {
         this.timeOfDeath = timeOfDeath;
         return this;
     }
+
+    public LocalDateTime getRespawnStartTime() {
+        return respawnStartTime;
+    }
+
+    public RaidBossViewModel setRespawnStartTime(LocalDateTime respawnStartTime) {
+        this.respawnStartTime = respawnStartTime;
+        return this;
+    }
+    public Long getTimeDiffFromNowToRespawnStart(LocalDateTime now) {
+        if (respawnStartTime == null) {
+            return null;
+        }
+        Long minutesDifference = Math.abs(Duration.between(respawnStartTime, now).toMinutes());
+        return minutesDifference;
+    }
+
+    public String getWidthPercentage(LocalDateTime now) {
+        Long totalMinutesSpawn = 60L;
+        if (name.equals(GlobalConstants.BARAKIEL)) {
+            totalMinutesSpawn = 15L;
+        }
+        Long timeDiff = getTimeDiffFromNowToRespawnStart(now);
+        if (timeDiff == null) {
+            return null;
+        }
+        double percentage = 100.0 * timeDiff / totalMinutesSpawn;
+        StringBuilder sb = new StringBuilder(String.format("width: %.2f%%", percentage).replace(",", "."));
+        System.out.println(sb.toString());
+        return sb.toString();
+    }
+
 }

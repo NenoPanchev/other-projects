@@ -1,11 +1,15 @@
 package com.example.rebornx30rbrespawntime.web;
 
+import com.example.rebornx30rbrespawntime.init.AppInit;
 import com.example.rebornx30rbrespawntime.service.RaidBossService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -18,8 +22,11 @@ public class HomeController {
     }
 
     @GetMapping
-    public String index(Model model) {
+    public String index(Model model) throws UnsupportedAudioFileException, LineUnavailableException, IOException {
+        AppInit.update();
+        LocalDateTime now = LocalDateTime.now();
         model.addAttribute("allBosses", raidBossService.getAllRaidBosses());
+        model.addAttribute("now", now);
         return "index";
     }
 
