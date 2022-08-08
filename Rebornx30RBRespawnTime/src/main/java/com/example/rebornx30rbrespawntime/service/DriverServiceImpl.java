@@ -31,6 +31,7 @@ public class DriverServiceImpl {
             String name = boss.select("u").first().text();
 
             List<TextNode> respawns = boss.children().get(5).textNodes();
+
             boolean alive = respawns.size() == 0;
 
             String level = boss.textNodes().get(2).text();
