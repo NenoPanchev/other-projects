@@ -50,7 +50,7 @@ public class DriverServiceImpl {
             }
             if (levelNumber >= LEVEL_BRACKET && nameNotIn(name)) {
                 if (name.equals(GlobalConstants.BARAKIEL) && respawnLocal != null) {
-                    respawnEnd = respawnLocal.plusMinutes(15);
+                    respawnEnd = respawnLocal.plusMinutes(30);
                 }
 
                 RaidBoss rb = new RaidBoss()
