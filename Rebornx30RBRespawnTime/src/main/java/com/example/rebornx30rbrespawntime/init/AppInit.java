@@ -43,14 +43,7 @@ public class AppInit implements CommandLineRunner {
     @Scheduled(fixedRate = 180000)
     public static void update() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
         driver.get(SITE_URL);
-//        Connection.Response response = Jsoup.connect(SITE_URL)
-//                .method(Connection.Method.GET)
-//                .userAgent(GlobalConstants.USER_AGENT)
-//                .execute();
-
         Document doc = Jsoup.parse(driver.getPageSource());
-//        Document doc = response.parse();
-//        Document doc = Jsoup.connect(SITE_URL).timeout(0).maxBodySize(0).get();
         List<RaidBoss> raidBosses = driverService.parseHTMLIntoRBInfo(doc);
         raidBossService.updateInfo(raidBosses);
 

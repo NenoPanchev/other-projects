@@ -14,6 +14,9 @@ public class RaidBossViewModel {
     private String respawnEnd;
     private LocalDateTime respawnStartTime;
     private String timeOfDeath;
+    private String rebornID;
+    private String dropURL;
+    private String locationURL;
 
     public RaidBossViewModel() {
     }
@@ -89,6 +92,34 @@ public class RaidBossViewModel {
         this.respawnStartTime = respawnStartTime;
         return this;
     }
+
+    public String getRebornID() {
+        return rebornID;
+    }
+
+    public RaidBossViewModel setRebornID(String rebornID) {
+        this.rebornID = rebornID;
+        return this;
+    }
+
+    public String getDropURL() {
+        return dropURL;
+    }
+
+    public RaidBossViewModel setDropURL(String dropURL) {
+        this.dropURL = dropURL;
+        return this;
+    }
+
+    public String getLocationURL() {
+        return locationURL;
+    }
+
+    public RaidBossViewModel setLocationURL(String locationURL) {
+        this.locationURL = locationURL;
+        return this;
+    }
+
     public Long getTimeDiffFromNowToRespawnStart(LocalDateTime now) {
         if (respawnStartTime == null) {
             return null;

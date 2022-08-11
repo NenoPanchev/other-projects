@@ -1,5 +1,6 @@
 package com.example.rebornx30rbrespawntime.service;
 
+import com.example.rebornx30rbrespawntime.constants.GlobalConstants;
 import com.example.rebornx30rbrespawntime.model.entity.RaidBoss;
 import com.example.rebornx30rbrespawntime.model.view.RaidBossViewModel;
 import com.example.rebornx30rbrespawntime.repository.RaidBossRepository;
@@ -11,6 +12,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,6 +39,10 @@ public class RaidBossServiceImpl implements RaidBossService {
         } else if (rb.getName().equals(BARAKIEL)) {
             rb.setRespawnTime(6L);
         }
+        String rebornId = namesIDs.get(rb.getName());
+        rb.setRebornID(rebornId)
+                .setDropURL(String.format("https://interlude.wiki/db/npc/%s.html", rebornId))
+                .setLocationURL(String.format("https://interlude.wiki/db/loc/%s.html", rebornId));
         raidBossRepository.save(rb);
     }
 
@@ -47,7 +53,7 @@ public class RaidBossServiceImpl implements RaidBossService {
                 .stream()
                 .map(entity -> modelMapper.map(entity, RaidBossViewModel.class)
                 .setRespawnStart(entity.getRespawnStart() == null ? "" : getTimeFrom(entity.getRespawnStart()))
-                .setRespawnEnd(entity.getRespawnEnd() == null ? "" : getTimeFrom(entity.getRespawnEnd()))
+                .setRespawnEnd(entity.getRespawnEnd() == null ? "" : Arrays.stream(getTimeFrom(entity.getRespawnEnd()).split(" - ")).skip(1).findFirst().orElse(""))
                         .setRespawnStartTime(entity.getRespawnStart() == null ? null : entity.getRespawnStart())
                 .setTimeOfDeath(entity.getTimeOfDeath() == null ? "" : getTimeFrom(entity.getTimeOfDeath())))
                 .collect(Collectors.toList());

@@ -15,6 +15,9 @@ public class RaidBoss extends BaseEntity{
     private LocalDateTime respawnEnd;
     private LocalDateTime timeOfDeath;
     private Long respawnTime;
+    private String rebornID;
+    private String dropURL;
+    private String locationURL;
 
     public RaidBoss() {
         setRespawnTime(18L);
@@ -86,6 +89,33 @@ public class RaidBoss extends BaseEntity{
 
     public RaidBoss setRespawnTime(Long respawnTime) {
         this.respawnTime = respawnTime;
+        return this;
+    }
+
+    public String getRebornID() {
+        return rebornID;
+    }
+
+    public RaidBoss setRebornID(String rebornID) {
+        this.rebornID = rebornID;
+        return this;
+    }
+
+    public String getDropURL() {
+        return dropURL;
+    }
+
+    public RaidBoss setDropURL(String dropURL) {
+        this.dropURL = dropURL;
+        return this;
+    }
+
+    public String getLocationURL() {
+        return locationURL;
+    }
+
+    public RaidBoss setLocationURL(String locationURL) {
+        this.locationURL = locationURL;
         return this;
     }
 }

@@ -22,7 +22,8 @@
             <th scope="col">Respawn Start</th>
             <th scope="col">Respawn End</th>
             <th scope="col">Window</th>
-            <th scope="col">Add Time of Death</th>
+            <th scope="col">Drop</th>
+            <th scope="col">Location</th>
         </tr>
         </thead>
         <tbody>
@@ -48,11 +49,13 @@
                         </div>
                     </div>
                 </td>
-                <td><input type="datetime-local" class="form-control datetimepicker"
-                           name="tod" id="posted"></td>
-                <td>
-                    <button type="submit">Add Time of Death</button>
-                </td>
+                <td><a th:href="*{dropURL}">drop</a></td>
+                <td><a th:href="*{locationURL}">location</a></td>
+<!--                <td><input type="datetime-local" class="form-control datetimepicker"-->
+<!--                           name="tod" id="posted"></td>-->
+<!--                <td>-->
+<!--                    <button type="submit">Add Time of Death</button>-->
+<!--                </td>-->
             </form>
         </tr>
         </tbody>
