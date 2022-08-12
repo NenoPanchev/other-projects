@@ -13,7 +13,7 @@ public interface RaidBossService {
     void seedRaidBoss(RaidBoss raidBoss);
     List<RaidBossViewModel> getAllRaidBosses();
 
-    void updateInfo(List<RaidBoss> raidBosses) throws UnsupportedAudioFileException, LineUnavailableException, IOException;
+    void updateInfo() throws UnsupportedAudioFileException, LineUnavailableException, IOException;
 
     void updateTimeOfDeath(String name, LocalDateTime timeOfDeath);
 }

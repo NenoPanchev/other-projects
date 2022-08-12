@@ -2,6 +2,7 @@ package com.example.rebornx30rbrespawntime.web;
 
 import com.example.rebornx30rbrespawntime.init.AppInit;
 import com.example.rebornx30rbrespawntime.service.RaidBossService;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +24,7 @@ public class HomeController {
 
     @GetMapping
     public String index(Model model) throws UnsupportedAudioFileException, LineUnavailableException, IOException {
-        AppInit.update();
+        raidBossService.updateInfo();
         LocalDateTime now = LocalDateTime.now();
         model.addAttribute("allBosses", raidBossService.getAllRaidBosses());
         model.addAttribute("now", now);

@@ -1,10 +1,12 @@
 package com.example.rebornx30rbrespawntime.service;
 
-import com.example.rebornx30rbrespawntime.constants.GlobalConstants;
 import com.example.rebornx30rbrespawntime.model.entity.RaidBoss;
 import com.example.rebornx30rbrespawntime.model.view.RaidBossViewModel;
 import com.example.rebornx30rbrespawntime.repository.RaidBossRepository;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.modelmapper.ModelMapper;
+import org.openqa.selenium.WebDriver;
 import org.springframework.stereotype.Service;
 
 import javax.sound.sampled.LineUnavailableException;
@@ -24,12 +26,14 @@ public class RaidBossServiceImpl implements RaidBossService {
     private final DriverServiceImpl driverService;
     private final ModelMapper modelMapper;
     private final AudioServiceImpl audioService;
+    private final WebDriver driver;
 
-    public RaidBossServiceImpl(RaidBossRepository raidBossRepository, DriverServiceImpl driverService, ModelMapper modelMapper, AudioServiceImpl audioService) {
+    public RaidBossServiceImpl(RaidBossRepository raidBossRepository, DriverServiceImpl driverService, ModelMapper modelMapper, AudioServiceImpl audioService, WebDriver driver) {
         this.raidBossRepository = raidBossRepository;
         this.driverService = driverService;
         this.modelMapper = modelMapper;
         this.audioService = audioService;
+        this.driver = driver;
     }
 
     @Override
@@ -69,7 +73,12 @@ public class RaidBossServiceImpl implements RaidBossService {
     }
 
     @Override
-    public void updateInfo(List<RaidBoss> raidBosses) throws UnsupportedAudioFileException, LineUnavailableException, IOException {
+    public void updateInfo() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
+        driver.get(SITE_URL);
+        Document doc = Jsoup.parse(driver.getPageSource());
+        List<RaidBoss> raidBosses = driverService.parseHTMLIntoRBInfo(doc);
+        boolean alive = true;
+
         for (RaidBoss rb : raidBosses) {
             if (!raidBossRepository.existsByName(rb.getName())) {
                 seedRaidBoss(rb);
@@ -84,7 +93,7 @@ public class RaidBossServiceImpl implements RaidBossService {
                         .setTimeOfDeath(null)
                         .setAlive(true);
                 raidBossRepository.save(rbEntity);
-                audioService.playSound();
+                alive = true;
                 continue;
             }
 
@@ -107,7 +116,10 @@ public class RaidBossServiceImpl implements RaidBossService {
                     raidBossRepository.save(rbEntity);
             }
         }
-    }
+        if (alive) {
+            audioService.playSound();
+        }
+      }
 
     @Override
     public void updateTimeOfDeath(String name, LocalDateTime timeOfDeath) {

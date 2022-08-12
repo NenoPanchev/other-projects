@@ -139,7 +139,6 @@ public class RaidBossViewModel {
         }
         double percentage = 100.0 * timeDiff / totalMinutesSpawn;
         StringBuilder sb = new StringBuilder(String.format("width: %.2f%%", percentage).replace(",", "."));
-        System.out.println(sb.toString());
         return sb.toString();
     }
 
