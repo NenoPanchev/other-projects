@@ -22,12 +22,9 @@ public class AudioServiceImpl {
     }
 
     public void playSound() {
-        System.out.println(clip.isActive());
-        System.out.println(clip.isOpen());
         clip.start();
         clip.setFramePosition(0);
         clip.flush();
-
     }
 
 }

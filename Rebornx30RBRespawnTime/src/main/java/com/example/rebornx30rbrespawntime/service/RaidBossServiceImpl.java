@@ -73,11 +73,11 @@ public class RaidBossServiceImpl implements RaidBossService {
     }
 
     @Override
-    public void updateInfo() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
+    public void updateInfo() {
         driver.get(SITE_URL);
         Document doc = Jsoup.parse(driver.getPageSource());
         List<RaidBoss> raidBosses = driverService.parseHTMLIntoRBInfo(doc);
-        boolean alive = true;
+        boolean alive = false;
 
         for (RaidBoss rb : raidBosses) {
             if (!raidBossRepository.existsByName(rb.getName())) {
@@ -103,7 +103,6 @@ public class RaidBossServiceImpl implements RaidBossService {
                         .setRespawnEnd(rb.getRespawnEnd());
                 raidBossRepository.save(rbEntity);
 
-//                setRespawnByTimeOfDeath(rbEntity, rb, driverService.getTimeOfUpdate());
                 continue;
             }
 
