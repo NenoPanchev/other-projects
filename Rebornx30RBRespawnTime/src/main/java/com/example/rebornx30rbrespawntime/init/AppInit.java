@@ -1,23 +1,22 @@
 package com.example.rebornx30rbrespawntime.init;
 
-import com.example.rebornx30rbrespawntime.service.AudioServiceImpl;
-
+import com.example.rebornx30rbrespawntime.service.RaidBossService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AppInit implements CommandLineRunner {
-    private final AudioServiceImpl audioService;
+    private final RaidBossService raidBossService;
 
 
-    public AppInit(AudioServiceImpl audioService) {
-
-        this.audioService = audioService;
+    public AppInit(RaidBossService raidBossService) {
+        this.raidBossService = raidBossService;
     }
 
     @Override
     public void run(String... args) throws Exception {
-        audioService.openSound();
+//        raidBossService.exportRaidBosses();
+        raidBossService.initialSeedRaidBosses();
     }
 
 }

@@ -8,6 +8,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,6 +25,17 @@ public class AppInit implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+
+        URL url = new URL("https://seasons.l2reborn.org/wp-content/uploads/raids/raids.json?1660423978");
+        HttpURLConnection http = (HttpURLConnection)url.openConnection();
+        http.setRequestProperty("Accept", "application/json");
+
+        Object content = http.getContent();
+        System.out.println(http.getResponseCode() + " " + http.getResponseMessage() + http.getContent().toString());
+        http.disconnect();
+
+        System.out.println(Instant.now().getEpochSecond());
+        System.out.println(Instant.now().getNano());
         // # Go to login page and grab cookies sent by server
             Connection.Response loginForm = Jsoup.connect(LOGIN_FORM_URL)
                 .method(Connection.Method.GET)

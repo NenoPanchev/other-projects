@@ -1,20 +1,29 @@
 package com.example.rebornx30rbrespawntime.service;
 
+import com.example.rebornx30rbrespawntime.model.dto.RaidBossExportDto;
+import com.example.rebornx30rbrespawntime.model.dto.RaidBossUpdateDto;
 import com.example.rebornx30rbrespawntime.model.entity.RaidBoss;
+import com.example.rebornx30rbrespawntime.model.service.RaidBossServiceModel;
 import com.example.rebornx30rbrespawntime.model.view.RaidBossViewModel;
 import com.example.rebornx30rbrespawntime.repository.RaidBossRepository;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
+import com.google.gson.Gson;
 import org.modelmapper.ModelMapper;
-import org.openqa.selenium.WebDriver;
 import org.springframework.stereotype.Service;
 
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
+
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
-import java.time.Duration;
-import java.time.LocalDateTime;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,31 +32,13 @@ import static com.example.rebornx30rbrespawntime.constants.GlobalConstants.*;
 @Service
 public class RaidBossServiceImpl implements RaidBossService {
     private final RaidBossRepository raidBossRepository;
-    private final DriverServiceImpl driverService;
     private final ModelMapper modelMapper;
-    private final AudioServiceImpl audioService;
-    private final WebDriver driver;
+    private final Gson gson;
 
-    public RaidBossServiceImpl(RaidBossRepository raidBossRepository, DriverServiceImpl driverService, ModelMapper modelMapper, AudioServiceImpl audioService, WebDriver driver) {
+    public RaidBossServiceImpl(RaidBossRepository raidBossRepository, ModelMapper modelMapper, Gson gson) {
         this.raidBossRepository = raidBossRepository;
-        this.driverService = driverService;
         this.modelMapper = modelMapper;
-        this.audioService = audioService;
-        this.driver = driver;
-    }
-
-    @Override
-    public void seedRaidBoss(RaidBoss rb) {
-        if (SUB_AND_ALLY_BOSSES.contains(rb.getName())) {
-            rb.setRespawnTime(8L);
-        } else if (rb.getName().equals(BARAKIEL)) {
-            rb.setRespawnTime(6L);
-        }
-        String rebornId = namesIDs.get(rb.getName());
-        rb.setRebornID(rebornId)
-                .setDropURL(String.format("https://interlude.wiki/db/npc/%s.html", rebornId))
-                .setLocationURL(String.format("https://interlude.wiki/db/loc/%s.html", rebornId));
-        raidBossRepository.save(rb);
+        this.gson = gson;
     }
 
     @Override
@@ -56,10 +47,9 @@ public class RaidBossServiceImpl implements RaidBossService {
                 .findAllByOrderByRespawnEnd()
                 .stream()
                 .map(entity -> modelMapper.map(entity, RaidBossViewModel.class)
-                .setRespawnStart(entity.getRespawnStart() == null ? "" : getTimeFrom(entity.getRespawnStart()))
-                .setRespawnEnd(entity.getRespawnEnd() == null ? "" : Arrays.stream(getTimeFrom(entity.getRespawnEnd()).split(" - ")).skip(1).findFirst().orElse(""))
-                        .setRespawnStartTime(entity.getRespawnStart() == null ? null : entity.getRespawnStart())
-                .setTimeOfDeath(entity.getTimeOfDeath() == null ? "" : getTimeFrom(entity.getTimeOfDeath())))
+                        .setRespawnStart(entity.getRespawnStart() == null ? "" : getTimeFrom(entity.getRespawnStart()))
+                        .setRespawnEnd(entity.getRespawnEnd() == null ? "" : Arrays.stream(getTimeFrom(entity.getRespawnEnd()).split(" - ")).skip(1).findFirst().orElse(""))
+                        .setRespawnStartTime(entity.getRespawnStart() == null ? null : entity.getRespawnStart()))
                 .collect(Collectors.toList());
     }
 
@@ -73,81 +63,95 @@ public class RaidBossServiceImpl implements RaidBossService {
     }
 
     @Override
-    public void updateInfo() {
-        driver.get(SITE_URL);
-        Document doc = Jsoup.parse(driver.getPageSource());
-        List<RaidBoss> raidBosses = driverService.parseHTMLIntoRBInfo(doc);
-        boolean alive = false;
-
-        for (RaidBoss rb : raidBosses) {
-            if (!raidBossRepository.existsByName(rb.getName())) {
-                seedRaidBoss(rb);
-                continue;
-            }
-
-            RaidBoss rbEntity = raidBossRepository.findByName(rb.getName()).orElseThrow();
-
-            if (rb.isAlive()) {
-                rbEntity.setRespawnStart(null)
-                        .setRespawnEnd(null)
-                        .setTimeOfDeath(null)
-                        .setAlive(true);
-                raidBossRepository.save(rbEntity);
-                alive = true;
-                continue;
-            }
-
-            if (rbEntity.isAlive() && !rb.isAlive()) {
-                rbEntity.setRespawnStart(rb.getRespawnStart())
-                        .setAlive(rb.isAlive())
-                        .setRespawnEnd(rb.getRespawnEnd());
-                raidBossRepository.save(rbEntity);
-
-                continue;
-            }
-
-            Long hoursDifference = Math.abs(Duration.between(rb.getRespawnStart(), rbEntity.getRespawnStart()).toHours());
-            if (hoursDifference != 0) {
-                    rbEntity.setRespawnStart(rb.getRespawnStart());
-                    rbEntity.setRespawnEnd(rb.getRespawnEnd());
-                    rbEntity.setTimeOfDeath(null);
-                    rbEntity.setAlive(false);
-                    raidBossRepository.save(rbEntity);
-            }
-        }
-        if (alive) {
-            audioService.playSound();
-        }
-      }
-
-    @Override
-    public void updateTimeOfDeath(String name, LocalDateTime timeOfDeath) {
-        RaidBoss rbEntity = raidBossRepository.findByName(name).orElseThrow();
-        rbEntity.setTimeOfDeath(timeOfDeath);
-        Long hoursDifference = Duration.between(timeOfDeath, rbEntity.getRespawnStart()).toHours();
-
-        int minuteOfDeath = timeOfDeath.getMinute();
-        if (hoursDifference < rbEntity.getRespawnTime()) {
-            rbEntity.setRespawnStart(rbEntity.getRespawnStart().plusMinutes(minuteOfDeath));
-        } else {
-            rbEntity.setRespawnEnd(rbEntity.getRespawnStart().plusMinutes(minuteOfDeath));
-        }
-        raidBossRepository.save(rbEntity);
+    public void exportRaidBosses() throws IOException {
+        Files.write(Paths.get(RAID_BOSSES),
+                Collections.singleton(gson.toJson(raidBossRepository.findAll()
+                        .stream()
+                        .map(view -> modelMapper.map(view, RaidBossExportDto.class))
+                        .collect(Collectors.toList()))),
+                StandardCharsets.UTF_8);
     }
 
-    private void setRespawnByTimeOfDeath(RaidBoss rbEntity, RaidBoss rbNewInfo, LocalDateTime timeOfDeath) {
-        rbEntity.setTimeOfDeath(timeOfDeath);
-        rbEntity.setAlive(false);
-
-        Long hoursDifference = Duration.between(timeOfDeath, rbNewInfo.getRespawnStart()).toHours();
-        int minuteOfDeath = timeOfDeath.getMinute();
-        if (hoursDifference < rbEntity.getRespawnTime()) {
-            rbEntity.setRespawnStart(rbNewInfo.getRespawnStart().plusMinutes(minuteOfDeath));
-            rbEntity.setRespawnEnd(rbNewInfo.getRespawnEnd());
-        } else {
-            rbEntity.setRespawnStart(rbNewInfo.getRespawnStart());
-            rbEntity.setRespawnEnd(rbNewInfo.getRespawnStart().plusMinutes(minuteOfDeath));
+    @Override
+    public void initialSeedRaidBosses() throws FileNotFoundException {
+        if (raidBossRepository.count() == 0) {
+            RaidBossExportDto[] dtos = gson.fromJson(new FileReader(RAID_BOSSES), RaidBossExportDto[].class);
+            Arrays.stream(dtos)
+                    .map(dto -> modelMapper.map(dto, RaidBoss.class)
+                            .setAlive(true)
+                            .setDropURL(String.format("https://interlude.wiki/db/npc/%s.html", dto.getRebornId()))
+                            .setLocationURL(String.format("https://interlude.wiki/db/loc/%s.html", dto.getRebornId())))
+                    .forEach(raidBossRepository::save);
         }
-        raidBossRepository.save(rbEntity);
+    }
+
+    @Override
+    public void update() throws IOException {
+        List<RaidBoss> raidBosses = raidBossRepository.findAll();
+        Instant now = Instant.now();
+        long epochSeconds = now.getEpochSecond();
+        URL url = new URL(JSON_URL + "?" + epochSeconds);
+        HttpURLConnection http = (HttpURLConnection) url.openConnection();
+        int responseCode = http.getResponseCode();
+        http.disconnect();
+
+        if (responseCode != 200) {
+            return;
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+
+        List<RaidBossUpdateDto> dtos = Arrays.stream(gson
+                .fromJson(new InputStreamReader(url.openStream()), RaidBossUpdateDto[].class))
+                .collect(Collectors.toList());
+
+        List<RaidBossServiceModel> serviceModels = dtos
+                .stream()
+                .map(dto -> {
+                    String startString = Arrays.stream(dto.getDate().split(" - ")).findFirst().orElse("");
+                    LocalDateTime respawnStartUCT = LocalDateTime.parse(startString, formatter);
+                    LocalDateTime respawnLocal = respawnStartUCT.atZone(ZoneOffset.UTC).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
+                    LocalDateTime respawnEnd = respawnLocal.plusHours(1);
+                    return modelMapper.map(dto, RaidBossServiceModel.class)
+                            .setAlive(dto.getStatus().equals("1"))
+                            .setRespawnStart(respawnLocal)
+                            .setRespawnEnd(respawnEnd);
+                })
+                .collect(Collectors.toList());
+
+        for (RaidBoss rb : raidBosses) {
+            RaidBossServiceModel serviceModel = serviceModels.stream()
+                    .filter(sm -> sm.getRebornID().equals(rb.getRebornID()))
+                    .findAny()
+                    .orElseThrow();
+
+
+            if (!rb.isAlive() && serviceModel.isAlive()) {
+                rb.setRespawnStart(null)
+                        .setRespawnEnd(null)
+                        .setAlive(true);
+                raidBossRepository.save(rb);
+                continue;
+            }
+
+            if (rb.isAlive() && !serviceModel.isAlive()) {
+                rb.setRespawnStart(serviceModel.getRespawnStart())
+                        .setAlive(false)
+                        .setRespawnEnd(serviceModel.getRespawnEnd());
+                raidBossRepository.save(rb);
+
+                continue;
+            }
+
+            if (!rb.isAlive() && !serviceModel.isAlive()) {
+                long hoursDifference = Math.abs(Duration.between(rb.getRespawnStart(), serviceModel.getRespawnStart()).toHours());
+                if (hoursDifference != 0) {
+                    rb.setRespawnStart(serviceModel.getRespawnStart());
+                    rb.setRespawnEnd(serviceModel.getRespawnEnd());
+                    rb.setAlive(false);
+                    raidBossRepository.save(rb);
+                }
+            }
+        }
     }
 }
