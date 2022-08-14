@@ -13,7 +13,6 @@ public class RaidBossViewModel {
     private String respawnStart;
     private String respawnEnd;
     private LocalDateTime respawnStartTime;
-    private String timeOfDeath;
     private String rebornID;
     private String dropURL;
     private String locationURL;
@@ -72,15 +71,6 @@ public class RaidBossViewModel {
 
     public RaidBossViewModel setRespawnEnd(String respawnEnd) {
         this.respawnEnd = respawnEnd;
-        return this;
-    }
-
-    public String getTimeOfDeath() {
-        return timeOfDeath;
-    }
-
-    public RaidBossViewModel setTimeOfDeath(String timeOfDeath) {
-        this.timeOfDeath = timeOfDeath;
         return this;
     }
 
