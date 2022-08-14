@@ -110,7 +110,7 @@ public class RaidBossServiceImpl implements RaidBossService {
                 .map(dto -> {
                     String startString = Arrays.stream(dto.getDate().split(" - ")).findFirst().orElse("");
                     LocalDateTime respawnStartUCT = LocalDateTime.parse(startString, formatter);
-                    LocalDateTime respawnLocal = respawnStartUCT.atZone(ZoneOffset.UTC).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
+                    LocalDateTime respawnLocal = respawnStartUCT.atZone(ZoneOffset.UTC).withZoneSameInstant(ZoneId.of("Europe/Sofia")).toLocalDateTime();
                     LocalDateTime respawnEnd = respawnLocal.plusHours(1);
                     return modelMapper.map(dto, RaidBossServiceModel.class)
                             .setAlive(dto.getStatus().equals("1"))
