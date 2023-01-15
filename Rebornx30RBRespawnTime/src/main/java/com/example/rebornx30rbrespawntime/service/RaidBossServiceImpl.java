@@ -124,7 +124,9 @@ public class RaidBossServiceImpl implements RaidBossService {
                     .filter(sm -> sm.getRebornID().equals(rb.getRebornID()))
                     .findAny()
                     .orElseThrow();
-
+            if (rb.getName().equals(BARAKIEL)) {
+                serviceModel.setRespawnEnd(serviceModel.getRespawnStart().plusMinutes(30));
+            }
 
             if (!rb.isAlive() && serviceModel.isAlive()) {
                 rb.setRespawnStart(null)
