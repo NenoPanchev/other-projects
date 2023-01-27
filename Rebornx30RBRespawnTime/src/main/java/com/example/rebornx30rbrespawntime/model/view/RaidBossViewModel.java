@@ -121,7 +121,7 @@ public class RaidBossViewModel {
     public String getWidthPercentage(LocalDateTime now) {
         Long totalMinutesSpawn = 60L;
         if (name.equals(GlobalConstants.BARAKIEL)) {
-            totalMinutesSpawn = 15L;
+            totalMinutesSpawn = 30L;
         }
         Long timeDiff = getTimeDiffFromNowToRespawnStart(now);
         if (timeDiff == null) {
