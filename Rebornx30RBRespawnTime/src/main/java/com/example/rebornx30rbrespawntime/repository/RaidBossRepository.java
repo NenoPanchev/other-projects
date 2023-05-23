@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface RaidBossRepository extends JpaRepository<RaidBoss, Long> {
-    List<RaidBoss> findAllByOrderByRespawnEnd();
+    List<RaidBoss> findAllByOrderByAliveDescRespawnEndAsc();
     boolean existsByName(String name);
     Optional<RaidBoss> findByName(String name);
 }

@@ -1,5 +1,6 @@
 package com.example.rebornx30rbrespawntime.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -7,7 +8,7 @@ public class RaidBossUpdateDto {
     @Expose
     private String status;
     @Expose
-    @SerializedName("id")
+    @JsonProperty("id")
     private String rebornId;
     @Expose
     private String date;

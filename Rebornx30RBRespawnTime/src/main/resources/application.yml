@@ -8,20 +8,36 @@ mvc:
     filter:
       enabled: true
 
-
+# PostgreSQL
 spring:
   datasource:
-    driverClassName: com.mysql.cj.jdbc.Driver
-    password: 12345
-    url: jdbc:mysql://localhost:3306/l2_raidboss_db?allowPublicKeyRetrieval=true&useSSL=false&createDatabaseIfNotExist=true
-    username: root
+    driverClassName: org.postgresql.Driver
+    password: 1234
+    url: jdbc:postgresql://localhost:5432/reborn_rb_db
+    username: postgres
   jpa:
     hibernate:
       ddl-auto: update
     open-in-view: false
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+
+# MySQL
+#spring:
+#  datasource:
+#    driverClassName: org.postgresql.Driver
+#    password: 1234
+#    url: jdbc:postgresql://localhost:5432/reborn_rb_db
+#    username: postgres
+#  jpa:
+#    hibernate:
+#      ddl-auto: update
+#    open-in-view: false
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.PostgreSQLDialect
+#        format_sql: true
 server:
   port : 8081

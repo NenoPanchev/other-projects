@@ -8,15 +8,17 @@ import com.example.rebornx30rbrespawntime.model.view.RaidBossViewModel;
 import com.example.rebornx30rbrespawntime.repository.RaidBossRepository;
 import com.google.gson.Gson;
 import org.modelmapper.ModelMapper;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -44,7 +46,7 @@ public class RaidBossServiceImpl implements RaidBossService {
     @Override
     public List<RaidBossViewModel> getAllRaidBosses() {
         return raidBossRepository
-                .findAllByOrderByRespawnEnd()
+                .findAllByOrderByAliveDescRespawnEndAsc()
                 .stream()
                 .map(entity -> modelMapper.map(entity, RaidBossViewModel.class)
                         .setRespawnStart(entity.getRespawnStart() == null ? "" : getTimeFrom(entity.getRespawnStart()))
@@ -90,10 +92,26 @@ public class RaidBossServiceImpl implements RaidBossService {
         List<RaidBoss> raidBosses = raidBossRepository.findAll();
         Instant now = Instant.now();
         long epochSeconds = now.getEpochSecond();
-        URL url = new URL(JSON_URL + "?" + epochSeconds);
-        HttpURLConnection http = (HttpURLConnection) url.openConnection();
-        int responseCode = http.getResponseCode();
-        http.disconnect();
+//        URL url = new URL(JSON_URL + "?" + epochSeconds);
+//        HttpURLConnection http = (HttpURLConnection) url.openConnection();
+//        http.disconnect();
+
+        String urlString = JSON_URL + "?" + epochSeconds;
+
+        WebClient.Builder builder = WebClient.builder();
+
+        ResponseEntity<List<RaidBossUpdateDto>> responseEntity = builder.build()
+                .get()
+                .uri(urlString)
+                .exchangeToMono(response -> {
+                    HttpStatus statusCode = response.statusCode();
+                    Mono<List<RaidBossUpdateDto>> body = response.bodyToMono(new ParameterizedTypeReference<List<RaidBossUpdateDto>>() {});
+                    return body.map(data -> ResponseEntity.status(statusCode).body(data));
+                })
+                .block();
+        assert responseEntity != null;
+        int responseCode = responseEntity.getStatusCodeValue();
+
 
         if (responseCode != 200) {
             return;
@@ -101,9 +119,7 @@ public class RaidBossServiceImpl implements RaidBossService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
 
-        List<RaidBossUpdateDto> dtos = Arrays.stream(gson
-                .fromJson(new InputStreamReader(url.openStream()), RaidBossUpdateDto[].class))
-                .collect(Collectors.toList());
+        List<RaidBossUpdateDto> dtos = responseEntity.getBody();
 
         List<RaidBossServiceModel> serviceModels = dtos
                 .stream()
@@ -123,7 +139,7 @@ public class RaidBossServiceImpl implements RaidBossService {
             RaidBossServiceModel serviceModel = serviceModels.stream()
                     .filter(sm -> sm.getRebornID().equals(rb.getRebornID()))
                     .findAny()
-                    .orElseThrow();
+                    .orElseThrow(IllegalArgumentException::new);
             if (rb.getName().equals(BARAKIEL)) {
                 serviceModel.setRespawnEnd(serviceModel.getRespawnStart().plusMinutes(30));
             }
