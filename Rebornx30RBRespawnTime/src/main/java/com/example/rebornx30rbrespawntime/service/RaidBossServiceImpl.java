@@ -92,10 +92,6 @@ public class RaidBossServiceImpl implements RaidBossService {
         List<RaidBoss> raidBosses = raidBossRepository.findAll();
         Instant now = Instant.now();
         long epochSeconds = now.getEpochSecond();
-//        URL url = new URL(JSON_URL + "?" + epochSeconds);
-//        HttpURLConnection http = (HttpURLConnection) url.openConnection();
-//        http.disconnect();
-
         String urlString = JSON_URL + "?" + epochSeconds;
 
         WebClient.Builder builder = WebClient.builder();
